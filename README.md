@@ -13,7 +13,7 @@ The results evaluated in this study were generated with the following suite of s
 - Creation of `HDF5` forcing files for `MOHID` oil spill mode using [Make-MIDOSS-Forcing](https://github.com/MIDOSS/Make-MIDOSS-Forcing)
 - Simulations of oil spill fate and transport using [MOHID-Cmd](https://github.com/MIDOSS/MOHID-Cmd?tab=readme-ov-file#license) and [MIDOSS-MOHID-CODE](https://github.com/MIDOSS/MIDOSS-MOHID-CODE).
 
-2018 oil transfer data can be requested from the Washington State Department of Ecology through a [request for public records](https://ecology.wa.gov/footer-pages/public-records-requests). 
+2018 oil transfer data for Washington State can be accessed through a [Washington State Department of Ecology public records request](https://ecology.wa.gov/footer-pages/public-records-requests). 
 
 ## Licenses
 
