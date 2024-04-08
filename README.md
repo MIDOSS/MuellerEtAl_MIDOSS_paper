@@ -1,5 +1,7 @@
 # A statistical representation of oil spill fate in the Salish Sea  <br />Code repository
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![image](https://github.com/MIDOSS/MuellerEtAl_MIDOSS_paper/assets/59846131/ac188cfe-d502-4048-96aa-2eff284e3b20)
+
 
 This repository contains the code developed during the MEOPAR-funded [MIDOSS project](https://midoss-docs.readthedocs.io/en/latest/index.html) and neccessary for reproducing the results and figures presented in: 
 
