@@ -149,11 +149,11 @@ def concat_shp(ship_type, shapefile_path):
             )
     return allTracks
 
-def get_doe_tanker_byvessel(vessels,doe_xls_path,fac_xls_path):
+def get_ECY_tanker_byvessel(vessels,ECY_xls_path,fac_xls_path):
     """
         Inputs:
             - vessels [list]: List of vessel names, e.g.["AMERICAN FREEDOM","PELICAN STATE"]
-            - doe_xls_path [path]: Location and name of DOE data spreadsheet
+            - ECY_xls_path [path]: Location and name of ECY data spreadsheet
             - fac_xls_path [path]: Location and name of facilities transfer spreadsheet
         Outputs:
             - cargo_transfers [dataframe]: 2018 cargo transfers to/from the vessels and 
@@ -162,17 +162,17 @@ def get_doe_tanker_byvessel(vessels,doe_xls_path,fac_xls_path):
     # conversion factor
     gal2liter = 3.78541
     # load dept. of ecology data
-    DOEdf = get_DOE_df(
-        doe_xls_path, 
+    ECY_df = get_ECY_df(
+        ECY_xls_path, 
         fac_xls_path,
         group = 'no'
     )
     # extract tanker cargo transfers
     if isinstance(vessels, list):
-        cargo_transfers = DOEdf.loc[
-            (DOEdf.TransferType == 'Cargo') &
-            (DOEdf.Deliverer.isin(vessels) |
-             DOEdf.Receiver.isin(vessels)),
+        cargo_transfers = ECY_df.loc[
+            (ECY_df.TransferType == 'Cargo') &
+            (ECY_df.Deliverer.isin(vessels) |
+             ECY_df.Receiver.isin(vessels)),
             ['TransferQtyInGallon', 'Deliverer','Receiver','StartDateTime','AntID']
         ].groupby('AntID').agg(
             {'TransferQtyInGallon':'sum',
@@ -181,10 +181,10 @@ def get_doe_tanker_byvessel(vessels,doe_xls_path,fac_xls_path):
              'StartDateTime':'first'}
             ).sort_values(by='TransferQtyInGallon',ascending=False)
     else: # if a string
-         cargo_transfers = DOEdf.loc[
-            (DOEdf.TransferType == 'Cargo') &
-            (DOEdf.Deliverer.str.contains(vessels) |
-             DOEdf.Receiver.str.contains(vessels)),
+         cargo_transfers = ECY_df.loc[
+            (ECY_df.TransferType == 'Cargo') &
+            (ECY_df.Deliverer.str.contains(vessels) |
+             ECY_df.Receiver.str.contains(vessels)),
             ['TransferQtyInGallon', 'Deliverer','Receiver','StartDateTime','AntID']
         ].groupby('AntID').agg(
             {'TransferQtyInGallon':'sum',
@@ -200,38 +200,38 @@ def get_doe_tanker_byvessel(vessels,doe_xls_path,fac_xls_path):
 
     return cargo_transfers
 
-def split_doe_transfers(doe_df):
+def split_ECY_transfers(ECY_df):
     """
-    split dataframe of DOE transfers into two-way transfers (import and export) and one-way transfers
+    split dataframe of ECY transfers into two-way transfers (import and export) and one-way transfers
     """
     one_way=pandas.DataFrame({})
     two_way=pandas.DataFrame({})
     count = 0
     idx_taken = 0
     # order transfers by time
-    doe_df = doe_df.sort_values(by='StartDateTime').reset_index(drop=True)
+    ECY_df = ECY_df.sort_values(by='StartDateTime').reset_index(drop=True)
     # categorize transfers
-    for idx,deliverer in enumerate(doe_df['Deliverer']):
-        if idx != doe_df['Deliverer'].shape[0]-1:
-            if ((doe_df['Deliverer'][idx] == doe_df['Receiver'][idx+1]) &
-                (doe_df['Deliverer'][idx+1] == doe_df['Receiver'][idx])):
+    for idx,deliverer in enumerate(ECY_df['Deliverer']):
+        if idx != ECY_df['Deliverer'].shape[0]-1:
+            if ((ECY_df['Deliverer'][idx] == ECY_df['Receiver'][idx+1]) &
+                (ECY_df['Deliverer'][idx+1] == ECY_df['Receiver'][idx])):
                 # count number of cases where there is a delivery both ways
                 count += 1
-                two_way = two_way.append(doe_df.iloc[[idx]])
+                two_way = two_way.append(ECY_df.iloc[[idx]])
                 idx_taken = 1
             else:
                 if idx_taken:
-                    two_way = two_way.append(doe_df.iloc[[idx]])
+                    two_way = two_way.append(ECY_df.iloc[[idx]])
                     idx_taken = 0
                 else:
-                    one_way = one_way.append(doe_df.iloc[[idx]])
+                    one_way = one_way.append(ECY_df.iloc[[idx]])
                     idx_taken = 0
         else:
             # categorize the last entry by comparing with the end - 1 values
-            if ((doe_df['Deliverer'][idx] == doe_df['Receiver'][idx-1]) &
-                (doe_df['Deliverer'][idx-1] == doe_df['Receiver'][idx])):
+            if ((ECY_df['Deliverer'][idx] == ECY_df['Receiver'][idx-1]) &
+                (ECY_df['Deliverer'][idx-1] == ECY_df['Receiver'][idx])):
                 count += 1
-                two_way = two_way.append(doe_df.iloc[[idx]])
+                two_way = two_way.append(ECY_df.iloc[[idx]])
     return one_way, two_way
 
 def get_oil_type_cargo(yaml_file, facility, ship_type, random_generator):
@@ -264,7 +264,7 @@ def get_oil_type_cargo(yaml_file, facility, ship_type, random_generator):
                     # end of first line, so I removed it....
                     raise Exception(['Error: fraction of fuel transfers ' 
                                     + f'for {ship_type} servicing {facility} '\
-                                    + f'does not sum to 1 in {yaml_file}'])
+                                    + f'ECYs not sum to 1 in {yaml_file}'])
                 
             return fuel_type
 
@@ -299,7 +299,7 @@ def get_oil_type_cargo_generic_US(yaml_file, ship_type, random_generator):
                     # end of first line, so I removed it....
                     raise Exception('Error: fraction of fuel transfers ' 
                                     f'for {ship_type} servicing {facility} '\
-                                    f'does not sum to 1 in {yaml_file}')
+                                    f'ECYs not sum to 1 in {yaml_file}')
                 
             return fuel_type
 
@@ -467,7 +467,7 @@ def get_voyage_transfers(voyage_xls, fac_xls):
     OUTPUT:
         dataframe with columns for atbs, tankers, barges and region
     """
-    # create dataframe for voyage transfers (From DOE_transfers.ipynb)
+    # create dataframe for voyage transfers (From ECY_transfers.ipynb)
     # read in data
     tankers_df = pandas.read_excel(
         voyage_xls,
@@ -538,15 +538,15 @@ def get_voyage_transfers(voyage_xls, fac_xls):
     voyages=voyages.set_index('LOCATION')   
     return voyages
 
-def get_doe_transfers(doe_xls, fac_xls):
+def get_ECY_transfers(ECY_xls, fac_xls):
     """
     PURPOSE: Tally transfers to/from marine terminals used in our study.
         Currently this just tallies cargo transfers but could easily be 
         modified to tally fuel or cargo + fuel
     INPUTS: 
-    - doe_xls: Path to Dept. of Ecology data file, 'MuellerTrans4-30-20.xlsx'
+    - ECY_xls: Path to Dept. of Ecology data file, 'MuellerTrans4-30-20.xlsx'
     - fac_xls: Path to facilities data (simply because it's used by 
-        get_DOE_df()), Oil_Transfer_Facilities.xlsx
+        get_ECY_df()), Oil_Transfer_Facilities.xlsx
     OUTPUTS:
     - Dataframe with total number of import, export and combined (import 
         + export) Cargo transfers for each marine terminal, sorted by vessel 
@@ -557,9 +557,9 @@ def get_doe_transfers(doe_xls, fac_xls):
     facdf = assign_facility_region(fac_xls)
     facility_names = facdf['FacilityName']
     
-    # Load DOE data
-    DOEdf = get_DOE_df(
-        doe_xls, 
+    # Load ECY data
+    ECY_df = get_ECY_df(
+        ECY_xls, 
         fac_xls,
         group = 'no'
     )
@@ -571,18 +571,18 @@ def get_doe_transfers(doe_xls, fac_xls):
     vessel_type = 'tanker'
     transfer_type = 'Cargo'
     type_description = ['TANK SHIP']
-    imports[vessel_type] = DOEdf.loc[
-        (DOEdf.TransferType == transfer_type) &
-        (DOEdf.DelivererTypeDescription.isin(type_description)) & 
-        (DOEdf.Receiver.isin(facility_names)),
+    imports[vessel_type] = ECY_df.loc[
+        (ECY_df.TransferType == transfer_type) &
+        (ECY_df.DelivererTypeDescription.isin(type_description)) & 
+        (ECY_df.Receiver.isin(facility_names)),
         ['Receiver', 'TransferType']
     ].groupby('Receiver').count().rename(columns={'TransferType':'imports'})
     imports[vessel_type].index.names=['LOCATIONS']
 
-    exports[vessel_type] = DOEdf.loc[
-        (DOEdf.TransferType == transfer_type) &
-        (DOEdf.ReceiverTypeDescription.isin(type_description)) & 
-        (DOEdf.Deliverer.isin(facility_names)),
+    exports[vessel_type] = ECY_df.loc[
+        (ECY_df.TransferType == transfer_type) &
+        (ECY_df.ReceiverTypeDescription.isin(type_description)) & 
+        (ECY_df.Deliverer.isin(facility_names)),
         ['Deliverer', 'TransferType']
     ].groupby('Deliverer').count().rename(columns={'TransferType':'exports'})
     exports[vessel_type].index.names=['LOCATIONS']
@@ -590,20 +590,20 @@ def get_doe_transfers(doe_xls, fac_xls):
     #~~~~~~~  ATBs ~~~~~~~~~~~~~~~~~~~~~~~
     vessel_type = 'atb'
     transfer_type = 'Cargo'
-    imports[vessel_type] = DOEdf.loc[
-        (DOEdf.TransferType == transfer_type) &
-        (DOEdf.Receiver.isin(facility_names)) &
-        (DOEdf.Deliverer.str.contains('ITB') | 
-         DOEdf.Deliverer.str.contains('ATB')), 
+    imports[vessel_type] = ECY_df.loc[
+        (ECY_df.TransferType == transfer_type) &
+        (ECY_df.Receiver.isin(facility_names)) &
+        (ECY_df.Deliverer.str.contains('ITB') | 
+         ECY_df.Deliverer.str.contains('ATB')), 
         ['Receiver', 'TransferType']
     ].groupby('Receiver').count().rename(columns={'TransferType':'imports'})
     imports[vessel_type].index.names=['LOCATIONS']
 
-    exports[vessel_type] = DOEdf.loc[
-        (DOEdf.TransferType == transfer_type) &
-        (DOEdf.Deliverer.isin(facility_names)) &
-        (DOEdf.Receiver.str.contains('ITB') | 
-         DOEdf.Receiver.str.contains('ATB')), 
+    exports[vessel_type] = ECY_df.loc[
+        (ECY_df.TransferType == transfer_type) &
+        (ECY_df.Deliverer.isin(facility_names)) &
+        (ECY_df.Receiver.str.contains('ITB') | 
+         ECY_df.Receiver.str.contains('ATB')), 
         ['Deliverer', 'TransferType']
     ].groupby('Deliverer').count().rename(columns={'TransferType':'exports'})
     exports[vessel_type].index.names=['LOCATIONS']
@@ -613,57 +613,57 @@ def get_doe_transfers(doe_xls, fac_xls):
     vessel_type = 'barge'
     transfer_type = 'Cargo'
     type_description = ['TANK BARGE','TUGBOAT']
-    imports[vessel_type] = DOEdf.loc[
-        (DOEdf.TransferType == transfer_type) &
-        (DOEdf.DelivererTypeDescription.isin(type_description)) & 
-        (~DOEdf.Deliverer.str.contains('ITB')) & 
-        (~DOEdf.Deliverer.str.contains('ATB')) &
-        (DOEdf.Receiver.isin(facility_names)), 
+    imports[vessel_type] = ECY_df.loc[
+        (ECY_df.TransferType == transfer_type) &
+        (ECY_df.DelivererTypeDescription.isin(type_description)) & 
+        (~ECY_df.Deliverer.str.contains('ITB')) & 
+        (~ECY_df.Deliverer.str.contains('ATB')) &
+        (ECY_df.Receiver.isin(facility_names)), 
         ['Receiver', 'TransferType']
     ].groupby('Receiver').count().rename(columns={'TransferType':'imports'})
     imports[vessel_type].index.names=['LOCATIONS']
 
-    exports[vessel_type] = DOEdf.loc[
-        (DOEdf.TransferType == transfer_type) &
-        (DOEdf.ReceiverTypeDescription.isin(type_description)) & 
-        (~DOEdf.Receiver.str.contains('ITB')) & 
-        (~DOEdf.Receiver.str.contains('ATB')) &
-        (DOEdf.Deliverer.isin(facility_names)), 
+    exports[vessel_type] = ECY_df.loc[
+        (ECY_df.TransferType == transfer_type) &
+        (ECY_df.ReceiverTypeDescription.isin(type_description)) & 
+        (~ECY_df.Receiver.str.contains('ITB')) & 
+        (~ECY_df.Receiver.str.contains('ATB')) &
+        (ECY_df.Deliverer.isin(facility_names)), 
         ['Deliverer', 'TransferType']
     ].groupby('Deliverer').count().rename(columns={'TransferType':'exports'})
     exports[vessel_type].index.names=['LOCATIONS']
 
-    doe={}
+    ECY={}
     for vessel in ['tanker','atb','barge']:
-        doe[vessel] = pandas.DataFrame(0,index=facility_names, columns={'combined'})
-        doe[vessel].index.name='LOCATIONS'
-        doe[vessel] = pandas.merge(
-            left=doe[vessel], 
+        ECY[vessel] = pandas.DataFrame(0,index=facility_names, columns={'combined'})
+        ECY[vessel].index.name='LOCATIONS'
+        ECY[vessel] = pandas.merge(
+            left=ECY[vessel], 
             right=exports[vessel],
             left_index = True,
             right_index=True,
             how='left'
         ).fillna(0)
-        doe[vessel] = pandas.merge(
-            left=doe[vessel], 
+        ECY[vessel] = pandas.merge(
+            left=ECY[vessel], 
             right=imports[vessel],
             left_index = True,
             right_index=True,
             how='left'
         ).fillna(0)
-        doe[vessel]['combined'] = (doe[vessel]['imports'] + 
-                                   doe[vessel]['exports'])
+        ECY[vessel]['combined'] = (ECY[vessel]['imports'] + 
+                                   ECY[vessel]['exports'])
     
     # Now assign regions to dataframe for each vessel "spreadsheet"
     for vessel in ['tanker','atb','barge']:
-        doe[vessel]['Region'] = 'not attributed'
+        ECY[vessel]['Region'] = 'not attributed'
         for idx,facility in enumerate(facdf['FacilityName']): 
-            doe[vessel]['Region'] = numpy.where(
-                (doe[vessel].index == facility), # identify transfer location
+            ECY[vessel]['Region'] = numpy.where(
+                (ECY[vessel].index == facility), # identify transfer location
                 facdf['Region'][idx],            # assign region to transfer
-                doe[vessel]['Region']            # or keep the NA attribution
+                ECY[vessel]['Region']            # or keep the NA attribution
             )
-    return doe
+    return ECY
 
 def get_montecarlo_df(MC_csv):
     """
@@ -698,17 +698,17 @@ def get_montecarlo_df(MC_csv):
     
     return mc_df
 
-def get_DOE_atb(DOE_xls, fac_xls, transfer_type = 'cargo', facilities='selected'):
+def get_ECY_atb(ECY_xls, fac_xls, transfer_type = 'cargo', facilities='selected'):
     """
     Returns transfer data for ATBs.
-    DOE_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
+    ECY_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
     facilities_xls[Path obj. or string]: Path(to spreadsheet with facilities information)
     transfer_type [string]: 'fuel', 'cargo', 'cargo_fuel'
     facilities [string]: 'all' or 'selected', 
     """
-    # load DOE data
-    DOE_df = get_DOE_df(
-        DOE_xls, 
+    # load ECY data
+    ECY_df = get_ECY_df(
+        ECY_xls, 
         fac_xls,
         group = 'yes'
     )
@@ -731,86 +731,86 @@ def get_DOE_atb(DOE_xls, fac_xls, transfer_type = 'cargo', facilities='selected'
         )
         # This list was copied from oil_attribution.yaml on 07/02/21
         # Eventually will update to read in from oil_attribution
-        facility_names = facdf['FacilityDOEName']
+        facility_names = facdf['FacilityECYName']
         
         if transfer_type == 'cargo':
-            import_df = DOE_df.loc[
-                (DOE_df.Receiver.isin(facility_names)) &
-                (DOE_df.TransferType == 'Cargo') &   
-                (DOE_df.Deliverer.str.contains('ITB') | 
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.Receiver.isin(facility_names)) &
+                (ECY_df.TransferType == 'Cargo') &   
+                (ECY_df.Deliverer.str.contains('ITB') | 
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
-            export_df = DOE_df.loc[
-                (DOE_df.Deliverer.isin(facility_names)) &
-                (DOE_df.TransferType == 'Cargo') &
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.Deliverer.isin(facility_names)) &
+                (ECY_df.TransferType == 'Cargo') &
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
 
         elif transfer_type == 'fuel':
-            import_df = DOE_df.loc[
-                (DOE_df.Receiver.isin(facility_names)) &
-                (DOE_df.TransferType == 'Fueling') &  
-                (DOE_df.Deliverer.str.contains('ITB') | 
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.Receiver.isin(facility_names)) &
+                (ECY_df.TransferType == 'Fueling') &  
+                (ECY_df.Deliverer.str.contains('ITB') | 
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
-            export_df = DOE_df.loc[
-                (DOE_df.Deliverer.isin(facility_names)) &
-                (DOE_df.TransferType == 'Fueling') &
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.Deliverer.isin(facility_names)) &
+                (ECY_df.TransferType == 'Fueling') &
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
 
         elif transfer_type == 'cargo_fuel':
-            import_df = DOE_df.loc[
-                (DOE_df.Receiver.isin(facility_names)) &
-                (DOE_df.Deliverer.str.contains('ITB') | 
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.Receiver.isin(facility_names)) &
+                (ECY_df.Deliverer.str.contains('ITB') | 
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
-            export_df = DOE_df.loc[
-                (DOE_df.Deliverer.isin(facility_names)) &
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.Deliverer.isin(facility_names)) &
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]         
         
     elif facilities == 'all':
         if transfer_type == 'cargo':
-            import_df = DOE_df.loc[
-                (DOE_df.TransferType == 'Cargo') & 
-                (DOE_df.Deliverer.str.contains('ITB') |
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.TransferType == 'Cargo') & 
+                (ECY_df.Deliverer.str.contains('ITB') |
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
-            export_df = DOE_df.loc[
-                (DOE_df.TransferType == 'Cargo') &
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.TransferType == 'Cargo') &
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
 
         elif transfer_type == 'fuel':
-            import_df = DOE_df.loc[
-                (DOE_df.TransferType == 'Fueling') & 
-                (DOE_df.Deliverer.str.contains('ITB') |
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.TransferType == 'Fueling') & 
+                (ECY_df.Deliverer.str.contains('ITB') |
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
-            export_df = DOE_df.loc[
-                (DOE_df.TransferType == 'Fueling') &
-                (DOE_df.Receiver.str.contains('ITB') |
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.TransferType == 'Fueling') &
+                (ECY_df.Receiver.str.contains('ITB') |
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
 
         elif transfer_type == 'cargo_fuel':
-            import_df = DOE_df.loc[
-                (DOE_df.Deliverer.str.contains('ITB') | 
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.Deliverer.str.contains('ITB') | 
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
-            export_df = DOE_df.loc[
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]           
         
     return import_df, export_df
 
-def get_DOE_df(DOE_xls, fac_xls, group='no'):
+def get_ECY_df(ECY_xls, fac_xls, group='no'):
     """
     group['yes','no']: Specificies whether or not terminals ought to be re-named to 
      the names used in our monte carlo grouping
@@ -826,7 +826,7 @@ def get_DOE_df(DOE_xls, fac_xls, group='no'):
     
     # read in data
     df = pandas.read_excel(
-        DOE_xls,
+        ECY_xls,
         sheet_name='Vessel Oil Transfer', 
         usecols="A,E,G,H,P,Q,R,W,X"
     )
@@ -845,7 +845,7 @@ def get_DOE_df(DOE_xls, fac_xls, group='no'):
         to_replace = "TLP",
         value = "TLP Management Services LLC (TMS)"
     )
-    # Housekeeping: Convert DOE terminal names to the names
+    # Housekeeping: Convert ECY terminal names to the names
     #  used in our monte-carlo, if different. 
     df = df.replace(
         to_replace = "Maxum (Rainer Petroleum)",
@@ -896,28 +896,28 @@ def get_DOE_df(DOE_xls, fac_xls, group='no'):
         )
     return df
 
-def rename_DOE_df_oils(DOE_df, DOE_xls):
+def rename_ECY_df_oils(ECY_df, ECY_xls):
     """
-    Reads in DOE dataframe with original 'Product' names and converts
+    Reads in ECY dataframe with original 'Product' names and converts
     them to the names we use in our monte-carlo
     
-    DOE_df: Department of Ecolody data in DataFrame format, 
-        as in output from get_DOE_df 
-    DOE_xls: The original DOE oil transfer spreadsheet, the same as is
-        read into get_DOE_df
+    ECY_df: Department of Ecolody data in DataFrame format, 
+        as in output from get_ECY_df 
+    ECY_xls: The original ECY oil transfer spreadsheet, the same as is
+        read into get_ECY_df
     """
     # I'm sure there is a better way of allowing name flaxibilitye
     # and preventing unnecessary memory hogging, but...I'm choosing
     # ease and efficiency right now....
-    df = DOE_df.copy()
+    df = ECY_df.copy()
     
     # read in monte-carlo oil classifications
-    oil_classification = get_DOE_oilclassification(DOE_xls)
+    oil_classification = get_ECY_oilclassification(ECY_xls)
 
     # Rename oil types to match our in-house naming convention
     for oil_mc in oil_classification.keys():
-        for oil_doe in oil_classification[oil_mc]:
-            df['Product'] = df['Product'].replace(oil_doe, oil_mc)
+        for oil_ECY in oil_classification[oil_mc]:
+            df['Product'] = df['Product'].replace(oil_ECY, oil_mc)
     # Now convert from our in-house names to our presentation names
     conditions = [
         (df['Product']=='akns'), 
@@ -938,11 +938,11 @@ def rename_DOE_df_oils(DOE_df, DOE_xls):
     
     return df
 
-def get_oil_classification(DOE_transfer_xlsx):
-    """ Returns the list of all the names in the DOE database that are 
+def get_oil_classification(ECY_transfer_xlsx):
+    """ Returns the list of all the names in the ECY database that are 
         attributed to our oil types.  
         INPUT['string' or Path]: 
-            location/name of 2018 DOE oil transfer excel spreadsheet
+            location/name of 2018 ECY oil transfer excel spreadsheet
         OUTPUT[dictionary]:
             Oil types attributed in our study to: AKNS, Bunker, Dilbit, 
             Diesel, Gas, Jet and Other. 
@@ -953,7 +953,7 @@ def get_oil_classification(DOE_transfer_xlsx):
     #   (w) DelivererTypeDescription, (x) ReceiverTypeDescription 
     #2018
     df = pandas.read_excel(
-        DOE_transfer_xlsx,
+        ECY_transfer_xlsx,
         sheet_name='Vessel Oil Transfer', 
         usecols="G,H,P,Q,R,W,X"
     )
@@ -1009,14 +1009,14 @@ def get_oil_classification(DOE_transfer_xlsx):
 
     return oil_classification
 
-def get_DOE_barges(DOE_xls,fac_xls, direction='combined',facilities='selected',transfer_type = 'cargo_fuel'):
+def get_ECY_barges(ECY_xls,fac_xls, direction='combined',facilities='selected',transfer_type = 'cargo_fuel'):
     """
     THIS CODE HAS A LOT OF REDUNDANCY. I PLAN TO UPDATE BY USING 
     COMBINED INPUT/OUTPUT TO RETURN EITHER IMPORT OR OUTPUT, IF SELECTED
     
-    ALSO CHANGE NAME TO GET_DOE_BARGES_TRANSFERS TO MATCH ATB FUNCTION
+    ALSO CHANGE NAME TO get_ECY_BARGES_TRANSFERS TO MATCH ATB FUNCTION
     Returns number of transfers to/from WA marine terminals used in our study
-    DOE_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
+    ECY_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
     marine_terminals [string list]: list of US marine terminals to include
     direction [string]: 'import','export','combined', where:
         'import' means from vessel to marine terminal
@@ -1025,11 +1025,11 @@ def get_DOE_barges(DOE_xls,fac_xls, direction='combined',facilities='selected',t
     facilities [string]: 'all' or 'selected', 
     transfer_type [string]: 'fuel','cargo','cargo_fuel'
     """
-    print('get_DOE_barges: not yet tested with fac_xls as input')
+    print('get_ECY_barges: not yet tested with fac_xls as input')
     
-    # load DOE data
-    DOE_df = get_DOE_df(
-        DOE_xls, 
+    # load ECY data
+    ECY_df = get_ECY_df(
+        ECY_xls, 
         fac_xls,
         group = 'yes'
     )
@@ -1078,62 +1078,62 @@ def get_DOE_barges(DOE_xls,fac_xls, direction='combined',facilities='selected',t
         if direction == 'import':
             print('import')
             if transfer_type == 'cargo':
-                import_df = DOE_df.loc[
-                    (DOE_df.Receiver.isin(facility_names)) &
-                    (DOE_df.TransferType == 'Cargo') &  
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.Receiver.isin(facility_names)) &
+                    (ECY_df.TransferType == 'Cargo') &  
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
 
             elif transfer_type == 'fuel':
-                import_df = DOE_df.loc[
-                    (DOE_df.Receiver.isin(facility_names)) &
-                    (DOE_df.TransferType == 'Fueling') &  
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.Receiver.isin(facility_names)) &
+                    (ECY_df.TransferType == 'Fueling') &  
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
 
             elif transfer_type == 'cargo_fuel':
-                import_df = DOE_df.loc[
-                    (DOE_df.Receiver.isin(facility_names)) &
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.Receiver.isin(facility_names)) &
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
             return import_df    
         if direction == 'export':
             print('export')
             #exports
             if transfer_type == 'cargo':
-                export_df = DOE_df.loc[
-                    (DOE_df.Deliverer.isin(facility_names)) &
-                    (DOE_df.TransferType == 'Cargo') &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.Deliverer.isin(facility_names)) &
+                    (ECY_df.TransferType == 'Cargo') &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             elif transfer_type == 'fuel':
-                export_df = DOE_df.loc[
-                    (DOE_df.Deliverer.isin(facility_names)) &
-                    (DOE_df.TransferType == 'Fueling') &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.Deliverer.isin(facility_names)) &
+                    (ECY_df.TransferType == 'Fueling') &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             elif transfer_type == 'cargo_fuel':
-                export_df = DOE_df.loc[
-                    (DOE_df.Deliverer.isin(facility_names)) &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.Deliverer.isin(facility_names)) &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             return export_df
         # Now combine both imports and exports for 
@@ -1142,64 +1142,64 @@ def get_DOE_barges(DOE_xls,fac_xls, direction='combined',facilities='selected',t
             #import
             if transfer_type == 'cargo':
                 print('cargo')
-                import_df = DOE_df.loc[
-                    (DOE_df.Receiver.isin(facility_names)) &
-                    (DOE_df.TransferType == 'Cargo') &  
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.Receiver.isin(facility_names)) &
+                    (ECY_df.TransferType == 'Cargo') &  
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
 
             elif transfer_type == 'fuel':
                 print('fuel')
-                import_df = DOE_df.loc[
-                    (DOE_df.Receiver.isin(facility_names)) &
-                    (DOE_df.TransferType == 'Fueling') &  
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.Receiver.isin(facility_names)) &
+                    (ECY_df.TransferType == 'Fueling') &  
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
 
             elif transfer_type == 'cargo_fuel':
                 print('cargo_fuel')
-                import_df = DOE_df.loc[
-                    (DOE_df.Receiver.isin(facility_names)) &
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.Receiver.isin(facility_names)) &
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
             #export
             if transfer_type == 'cargo':
                 print('cargo')
-                export_df = DOE_df.loc[
-                    (DOE_df.Deliverer.isin(facility_names)) &
-                    (DOE_df.TransferType == 'Cargo') &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.Deliverer.isin(facility_names)) &
+                    (ECY_df.TransferType == 'Cargo') &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             elif transfer_type == 'fuel':
                 print('fuel')
-                export_df = DOE_df.loc[
-                    (DOE_df.Deliverer.isin(facility_names)) &
-                    (DOE_df.TransferType == 'Fueling') &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.Deliverer.isin(facility_names)) &
+                    (ECY_df.TransferType == 'Fueling') &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             elif transfer_type == 'cargo_fuel':
                 print('cargo_fuel')
-                export_df = DOE_df.loc[
-                    (DOE_df.Deliverer.isin(facility_names)) &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.Deliverer.isin(facility_names)) &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             #combine import and export
             importexport_df = import_df.append(export_df)
@@ -1212,56 +1212,56 @@ def get_DOE_barges(DOE_xls,fac_xls, direction='combined',facilities='selected',t
         if direction == 'import':
             print('import')
             if transfer_type == 'cargo':
-                import_df = DOE_df.loc[
-                    (DOE_df.TransferType == 'Cargo') &  
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.TransferType == 'Cargo') &  
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
 
             elif transfer_type == 'fuel':
-                import_df = DOE_df.loc[
-                    (DOE_df.TransferType == 'Fueling') &  
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.TransferType == 'Fueling') &  
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
 
             elif transfer_type == 'cargo_fuel':
-                import_df = DOE_df.loc[
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
             return import_df    
         if direction == 'export':
             print('export')
             #exports
             if transfer_type == 'cargo':
-                export_df = DOE_df.loc[
-                    (DOE_df.TransferType == 'Cargo') &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.TransferType == 'Cargo') &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             elif transfer_type == 'fuel':
-                export_df = DOE_df.loc[
-                    (DOE_df.TransferType == 'Fueling') &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.TransferType == 'Fueling') &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             elif transfer_type == 'cargo_fuel':
-                export_df = DOE_df.loc[
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             return export_df
         # Now combine both imports and exports for 
@@ -1270,58 +1270,58 @@ def get_DOE_barges(DOE_xls,fac_xls, direction='combined',facilities='selected',t
             #import
             if transfer_type == 'cargo':
                 print('cargo')
-                import_df = DOE_df.loc[
-                    (DOE_df.TransferType == 'Cargo') &  
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.TransferType == 'Cargo') &  
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
 
             elif transfer_type == 'fuel':
                 print('fuel')
-                import_df = DOE_df.loc[
-                    (DOE_df.TransferType == 'Fueling') &  
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.TransferType == 'Fueling') &  
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
 
             elif transfer_type == 'cargo_fuel':
                 print('cargo_fuel')
-                import_df = DOE_df.loc[
-                    (DOE_df.DelivererTypeDescription.isin(
+                import_df = ECY_df.loc[
+                    (ECY_df.DelivererTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Deliverer.str.contains('ITB')) & 
-                    (~DOE_df.Deliverer.str.contains('ATB')),
+                    (~ECY_df.Deliverer.str.contains('ITB')) & 
+                    (~ECY_df.Deliverer.str.contains('ATB')),
                 ]
             #export
             if transfer_type == 'cargo':
                 print('cargo')
-                export_df = DOE_df.loc[
-                    (DOE_df.TransferType == 'Cargo') &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.TransferType == 'Cargo') &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             elif transfer_type == 'fuel':
                 print('fuel')
-                export_df = DOE_df.loc[
-                    (DOE_df.TransferType == 'Fueling') &
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.TransferType == 'Fueling') &
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             elif transfer_type == 'cargo_fuel':
                 print('cargo_fuel')
-                export_df = DOE_df.loc[
-                    (DOE_df.ReceiverTypeDescription.isin(
+                export_df = ECY_df.loc[
+                    (ECY_df.ReceiverTypeDescription.isin(
                         ['TANK BARGE','TUGBOAT'])) & 
-                    (~DOE_df.Receiver.str.contains('ITB')) & 
-                    (~DOE_df.Receiver.str.contains('ATB')),
+                    (~ECY_df.Receiver.str.contains('ITB')) & 
+                    (~ECY_df.Receiver.str.contains('ATB')),
                 ]
             #combine import and export
             importexport_df = import_df.append(export_df)
@@ -1330,10 +1330,10 @@ def get_DOE_barges(DOE_xls,fac_xls, direction='combined',facilities='selected',t
 
         
         
-def get_DOE_atb_transfers(DOE_xls,fac_xls,transfer_type = 'cargo',facilities='selected'):
+def get_ECY_atb_transfers(ECY_xls,fac_xls,transfer_type = 'cargo',facilities='selected'):
     """
     Returns number of transfers to/from WA marine terminals used in our study
-    DOE_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
+    ECY_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
     direction [string]: 'import','export','combined', where:
         'import' means from vessel to marine terminal
         'export' means from marine terminal to vessel
@@ -1343,9 +1343,9 @@ def get_DOE_atb_transfers(DOE_xls,fac_xls,transfer_type = 'cargo',facilities='se
     TO-DO: Update to count transfers with the same AntID as one
     """
     print('this code not yet tested with fac_xls as input')
-    # load DOE data
-    DOE_df = get_DOE_df(
-        DOE_xls, 
+    # load ECY data
+    ECY_df = get_ECY_df(
+        ECY_xls, 
         fac_xls,
         group = 'yes'
     )
@@ -1386,28 +1386,28 @@ def get_DOE_atb_transfers(DOE_xls,fac_xls,transfer_type = 'cargo',facilities='se
         #import
         if transfer_type == 'cargo':
             print('cargo')
-            import_df = DOE_df.loc[
-                (DOE_df.Receiver.isin(facility_names)) &
-                (DOE_df.TransferType == 'Cargo') &   
-                (DOE_df.Deliverer.str.contains('ITB') | 
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.Receiver.isin(facility_names)) &
+                (ECY_df.TransferType == 'Cargo') &   
+                (ECY_df.Deliverer.str.contains('ITB') | 
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
 
         elif transfer_type == 'fuel':
             print('fuel')
-            import_df = DOE_df.loc[
-                (DOE_df.Receiver.isin(facility_names)) &
-                (DOE_df.TransferType == 'Fueling') &  
-                (DOE_df.Deliverer.str.contains('ITB') | 
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.Receiver.isin(facility_names)) &
+                (ECY_df.TransferType == 'Fueling') &  
+                (ECY_df.Deliverer.str.contains('ITB') | 
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
 
         elif transfer_type == 'cargo_fuel':
             print('cargo_fuel')
-            import_df = DOE_df.loc[
-                (DOE_df.Receiver.isin(facility_names)) &
-                (DOE_df.Deliverer.str.contains('ITB') | 
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.Receiver.isin(facility_names)) &
+                (ECY_df.Deliverer.str.contains('ITB') | 
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
         import_count = import_df['Deliverer'].count()
         print(f'{import_count} {transfer_type}'
@@ -1415,26 +1415,26 @@ def get_DOE_atb_transfers(DOE_xls,fac_xls,transfer_type = 'cargo',facilities='se
         #export
         if transfer_type == 'cargo':
             print('cargo')
-            export_df = DOE_df.loc[
-                (DOE_df.Deliverer.isin(facility_names)) &
-                (DOE_df.TransferType == 'Cargo') &
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.Deliverer.isin(facility_names)) &
+                (ECY_df.TransferType == 'Cargo') &
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
         elif transfer_type == 'fuel':
             print('fuel')
-            export_df = DOE_df.loc[
-                (DOE_df.Deliverer.isin(facility_names)) &
-                (DOE_df.TransferType == 'Fueling') &
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.Deliverer.isin(facility_names)) &
+                (ECY_df.TransferType == 'Fueling') &
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
         elif transfer_type == 'cargo_fuel':
             print('cargo_fuel')
-            export_df = DOE_df.loc[
-                (DOE_df.Deliverer.isin(facility_names)) &
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.Deliverer.isin(facility_names)) &
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
         export_count = export_df['Deliverer'].count()
         print(f'{export_count} {transfer_type}'
@@ -1449,25 +1449,25 @@ def get_DOE_atb_transfers(DOE_xls,fac_xls,transfer_type = 'cargo',facilities='se
         #import
         if transfer_type == 'cargo':
             print('cargo')
-            import_df = DOE_df.loc[
-                (DOE_df.TransferType == 'Cargo') & 
-                (DOE_df.Deliverer.str.contains('ITB') |
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.TransferType == 'Cargo') & 
+                (ECY_df.Deliverer.str.contains('ITB') |
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
 
         elif transfer_type == 'fuel':
             print('fuel')
-            import_df = DOE_df.loc[
-                (DOE_df.TransferType == 'Fueling') & 
-                (DOE_df.Deliverer.str.contains('ITB') |
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.TransferType == 'Fueling') & 
+                (ECY_df.Deliverer.str.contains('ITB') |
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
 
         elif transfer_type == 'cargo_fuel':
             print('cargo_fuel')
-            import_df = DOE_df.loc[
-                (DOE_df.Deliverer.str.contains('ITB') | 
-                 DOE_df.Deliverer.str.contains('ATB')),
+            import_df = ECY_df.loc[
+                (ECY_df.Deliverer.str.contains('ITB') | 
+                 ECY_df.Deliverer.str.contains('ATB')),
             ]
         import_count = import_df['Deliverer'].count()
         print(f'{import_count} {transfer_type}'
@@ -1475,23 +1475,23 @@ def get_DOE_atb_transfers(DOE_xls,fac_xls,transfer_type = 'cargo',facilities='se
         #export
         if transfer_type == 'cargo':
             print('cargo')
-            export_df = DOE_df.loc[
-                (DOE_df.TransferType == 'Cargo') &
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.TransferType == 'Cargo') &
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
         elif transfer_type == 'fuel':
             print('fuel')
-            export_df = DOE_df.loc[
-                (DOE_df.TransferType == 'Fueling') &
-                (DOE_df.Receiver.str.contains('ITB') |
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.TransferType == 'Fueling') &
+                (ECY_df.Receiver.str.contains('ITB') |
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
         elif transfer_type == 'cargo_fuel':
             print('cargo_fuel')
-            export_df = DOE_df.loc[
-                (DOE_df.Receiver.str.contains('ITB') | 
-                 DOE_df.Receiver.str.contains('ATB')),
+            export_df = ECY_df.loc[
+                (ECY_df.Receiver.str.contains('ITB') | 
+                 ECY_df.Receiver.str.contains('ATB')),
             ]
         export_count = export_df['Deliverer'].count()
         print(f'{export_count} {transfer_type}'
@@ -1655,11 +1655,11 @@ def get_montecarlo_oil(vessel, monte_carlo_csv):
     
     return mc_capacity_byoil
             
-def get_DOE_oilclassification(DOE_xls):
+def get_ECY_oilclassification(ECY_xls):
     """
-    PURPOSE: To identify all the names of oils in DOE database that we attribute 
+    PURPOSE: To identify all the names of oils in ECY database that we attribute 
         to our oil type classifications. 
-    DOE_xls: Path to DOE spreadsheet (MuellerTrans4-30-20.xlsx, for our study) 
+    ECY_xls: Path to ECY spreadsheet (MuellerTrans4-30-20.xlsx, for our study) 
     
     TO DO: 
         Replace for-loop with more pythonic dataframe query method
@@ -1676,11 +1676,11 @@ def get_DOE_oilclassification(DOE_xls):
         oil_classification[oil] = []
     # read in data
     df = pandas.read_excel(
-        DOE_xls,
+        ECY_xls,
         sheet_name='Vessel Oil Transfer', 
         usecols="G,H,P,Q,R,W,X"
     )
-    # Loop through data and identify names of oils in the DOE database that 
+    # Loop through data and identify names of oils in the ECY database that 
     # we classify as being in one of our oil-type categories.
     [nrows,ncols] = df.shape
     for row in range(nrows):
@@ -1709,36 +1709,36 @@ def get_DOE_oilclassification(DOE_xls):
             oil_classification['other'].append(df.Product[row])
     return oil_classification            
             
-def get_DOE_exports(DOE_xls, fac_xls, facilities='selected'):
+def get_ECY_exports(ECY_xls, fac_xls, facilities='selected'):
     """
     Returns total gallons exported by vessel type and oil classification 
     to/from WA marine terminals used in our study
-    DOE_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
+    ECY_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
     facilities [string]: 'all' or 'selected'
     """
     # convert inputs to lower-case
     #transfer_type = transfer_type.lower()
     facilities = facilities.lower() 
     
-    print('get_DOE_exports: not yet tested with fac_xls as input')
+    print('get_ECY_exports: not yet tested with fac_xls as input')
     # Import Department of Ecology data: 
-    df = get_DOE_df(DOE_xls,fac_xls)
+    df = get_ECY_df(ECY_xls,fac_xls)
     
     # get list of oils grouped by our monte_carlo oil types
     oil_types = [
         'akns', 'bunker', 'dilbit', 
         'jet', 'diesel', 'gas', 'other'
     ]
-    oil_classification = get_DOE_oilclassification(DOE_xls)
+    oil_classification = get_ECY_oilclassification(ECY_xls)
     
     #  SELECTED FACILITIES
     export={}
     if facilities == 'selected':
         
         # The following list includes facilities used in Casey's origin/destination 
-        # analysis with names matching the Dept. of Ecology (DOE) database.  
+        # analysis with names matching the Dept. of Ecology (ECY) database.  
         # For example, the shapefile "Maxum Petroleum - Harbor Island Terminal" is 
-        # labeled as 'Maxum (Rainer Petroleum)' in the DOE database.  I use the 
+        # labeled as 'Maxum (Rainer Petroleum)' in the ECY database.  I use the 
         # Ecology language here and will need to translate to Shapefile speak
 
         # If facilities are used in output to compare with monte-carlo transfers
@@ -1815,13 +1815,13 @@ def get_DOE_exports(DOE_xls, fac_xls, facilities='selected'):
 
     return export
 
-def get_DOE_quantity_byfac(DOE_xls, fac_xls, facilities='selected'):
+def get_ECY_quantity_byfac(ECY_xls, fac_xls, facilities='selected'):
     """
     Returns total gallons of combined imports and exports 
     by vessel type and oil classification to/from WA marine terminals 
     used in our study.
     
-    DOE_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
+    ECY_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
     facilities [string]: 'all' or 'selected'
     """
     
@@ -1830,8 +1830,8 @@ def get_DOE_quantity_byfac(DOE_xls, fac_xls, facilities='selected'):
     facilities = facilities.lower() 
       
     # Import Department of Ecology data: 
-    print('get_DOE_quantity_byfac: not yet tested with fac_xls as input')
-    df = get_DOE_df(DOE_xls, fac_xls)
+    print('get_ECY_quantity_byfac: not yet tested with fac_xls as input')
+    df = get_ECY_df(ECY_xls, fac_xls)
     
     # get list of oils grouped by our monte_carlo oil types
     oil_types = [
@@ -1844,7 +1844,7 @@ def get_DOE_quantity_byfac(DOE_xls, fac_xls, facilities='selected'):
         'Jet Fuel', 'Diesel', 'Gasoline',
         'Other'
     ]
-    oil_classification = get_DOE_oilclassification(DOE_xls)
+    oil_classification = get_ECY_oilclassification(ECY_xls)
     
     #  SELECTED FACILITIES
     exports={}
@@ -1853,9 +1853,9 @@ def get_DOE_quantity_byfac(DOE_xls, fac_xls, facilities='selected'):
     if facilities == 'selected':
         
         # The following list includes facilities used in Casey's origin/destination 
-        # analysis with names matching the Dept. of Ecology (DOE) database.  
+        # analysis with names matching the Dept. of Ecology (ECY) database.  
         # For example, the shapefile "Maxum Petroleum - Harbor Island Terminal" is 
-        # labeled as 'Maxum (Rainer Petroleum)' in the DOE database.  I use the 
+        # labeled as 'Maxum (Rainer Petroleum)' in the ECY database.  I use the 
         # Ecology language here and will need to translate to Shapefile speak
 
         # If facilities are used in output to compare with monte-carlo transfers
@@ -1989,16 +1989,16 @@ def get_DOE_quantity_byfac(DOE_xls, fac_xls, facilities='selected'):
                 
     return exports, imports, combined
 
-def get_DOE_quantity(DOE_xls, fac_xls):
+def get_ECY_quantity(ECY_xls, fac_xls):
     """
     Returns total gallons of all WA transfers by vessel type and oil classification .
     
-    DOE_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
+    ECY_xls[Path obj. or string]: Path(to Dept. of Ecology transfer dataset)
     facilities [string]: 'all' or 'selected'
     """
     
     # Import Department of Ecology data: 
-    df = get_DOE_df(DOE_xls, fac_xls)
+    df = get_ECY_df(ECY_xls, fac_xls)
     
     # get list of oils grouped by our monte_carlo oil types
     oil_types = [
@@ -2011,7 +2011,7 @@ def get_DOE_quantity(DOE_xls, fac_xls):
         'Jet Fuel', 'Diesel', 'Gasoline',
         'Other'
     ]
-    oil_classification = get_DOE_oilclassification(DOE_xls)
+    oil_classification = get_ECY_oilclassification(ECY_xls)
     
     #  SELECTED FACILITIES
     imports={}
