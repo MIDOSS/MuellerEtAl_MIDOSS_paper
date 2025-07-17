@@ -15,7 +15,6 @@ The results evaluated in this study were generated using files archived through 
 
 ## FRDR Archive 
 - **GeoTiffs** derived from AIS ship track data
-- **Shapefiles** with ship track data attributed by joining AIS ship tracks using [code developed by Casey Hilliard to generate voyages from individual ship tracks](https://github.com/casey-h/MEOPAR_AIS/blob/master/02_Segment_Development/1_generate_tracks_from_AIS_DB_vectorized.py)
 - **Yaml files** with weighting values derived from, e.g., 2018 oil transfer data for Washington State, aquired through a [Washington State Department of Ecology public records request](https://ecology.wa.gov/footer-pages/public-records-requests). 
 - **Text files (.csv)** with sets of 10,000 random oil spill scenarios (spill file) based on monte-carlo approach in [UBC-MOAD/moad_tool/MIDOSS](https://github.com/UBC-MOAD/moad_tools/tree/main/moad_tools/midoss)
 
@@ -25,10 +24,11 @@ The results evaluated in this study were generated using files archived through 
   
     1. [MOHID-Cmd](https://github.com/MIDOSS/MOHID-Cmd?tab=readme-ov-file#license), and
     2. [MIDOSS-MOHID-CODE](https://github.com/MIDOSS/MIDOSS-MOHID-CODE).
+- Code developed by Casey Hilliard to generate voyages from individual ship tracks ([1_generate_tracks_from_AIS_DB_vectorized.py](https://github.com/casey-h/MEOPAR_AIS/blob/master/02_Segment_Development/1_generate_tracks_from_AIS_DB_vectorized.py))
 
 ## Related data sources
 - 2018 oil transfer data for Washington State can be accessed through a [Washington State Department of Ecology public records request](https://ecology.wa.gov/footer-pages/public-records-requests).
-- AIS ship track data is from [SPIRE maritime](https://spire.com/maritime/)
+- AIS ship track data is from [SPIRE maritime](https://spire.com/maritime/) (formerly exactEarth)
 
 ## Contributors
 1. Allen, Susan: Lead supervisor, co-developed script to [randomize oil spills](https://github.com/MIDOSS/MuellerEtAl_MIDOSS_paper/blob/main/moad_tools/random_oil_spills.py), co-developed MOHID oil spill fate model, developed post-processing tools. Edited manuscript. Lead grant proposal.
