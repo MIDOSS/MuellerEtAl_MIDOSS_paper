@@ -5,18 +5,10 @@ Code repository <br />
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 ![image](https://github.com/MIDOSS/MuellerEtAl_MIDOSS_paper/assets/59846131/ac188cfe-d502-4048-96aa-2eff284e3b20)
 
-
 This repository contains the code developed during the MEOPAR-funded [MIDOSS project](https://midoss-docs.readthedocs.io/en/latest/index.html) and neccessary for reproducing the results and figures presented in: 
 
 1. Mueller, R.D., S.E. Allen, S. Chang, H. Niu, D. Latornell, S. Li, R. Bagshaw, A. Bhudia, V. Do, K. Forysinsky, B. Moore-Maley, C. Power, L. Vespaziani. In Review. A statistical representation of oil spill fate in the Salish Sea (Part 1). Submitted to Marine Pollution Bulletin’s special issue on Oil Spills in Aquatic Systems.  
 2. Mueller, R.D., S.E. Allen, S. Chang, H. Niu, D. Latornell, S. Li, R. Bagshaw, A. Bhudia, V. Do, K. Forysinsky, B. Moore-Maley, C. Power, L. Vespaziani. Accepted. A statistical representation of oil spill fate in the Salish Sea (Part 2). Submitted to Marine Pollution Bulletin’s special issue on Oil Spills in Aquatic Systems.  
-
-The results evaluated in this study were generated using files archived through [Canada's FRDR](https://www.frdr-dfdr.ca/repo/?locale=en) in a collection named `MuellerEtAl_MIDOSS_datasets`.  
-
-## FRDR Archive 
-- **GeoTiffs** derived from AIS ship track data
-- **Yaml files** with weighting values derived from, e.g., 2018 oil transfer data for Washington State, aquired through a [Washington State Department of Ecology public records request](https://ecology.wa.gov/footer-pages/public-records-requests). 
-- **Text files (.csv)** with sets of 10,000 random oil spill scenarios (spill file) based on monte-carlo approach in [UBC-MOAD/moad_tool/MIDOSS](https://github.com/UBC-MOAD/moad_tools/tree/main/moad_tools/midoss)
 
 ## Related repositories
 - Creation of `HDF5` forcing files from, e.g., [SalishSeaCast](https://salishsea.eos.ubc.ca/erddap/index.html) for `MOHID` oil spill mode: [Make-MIDOSS-Forcing](https://github.com/MIDOSS/Make-MIDOSS-Forcing)
@@ -25,6 +17,14 @@ The results evaluated in this study were generated using files archived through 
     1. [MOHID-Cmd](https://github.com/MIDOSS/MOHID-Cmd?tab=readme-ov-file#license), and
     2. [MIDOSS-MOHID-CODE](https://github.com/MIDOSS/MIDOSS-MOHID-CODE).
 - Code developed by Casey Hilliard to generate voyages from individual ship tracks ([1_generate_tracks_from_AIS_DB_vectorized.py](https://github.com/casey-h/MEOPAR_AIS/blob/master/02_Segment_Development/1_generate_tracks_from_AIS_DB_vectorized.py))
+
+## Records Archive 
+Mueller, R., Allen, S., Chang, S., Niu, H., Latornell, D., Moore-Maley, B., Bhudia, A., Do, V., Forysinkski, K., Power, C., Bagshaw, R., Li, S. (2025). MuellerEtAl_MIDOSS_datasets. Federated Research Data Repository. [https://doi.org/10.20383/103.01353](https://doi.org/10.20383/103.01353)
+
+- **GeoTiffs** derived from AIS ship track data
+- **Yaml files** with weighting values derived from, e.g., 2018 oil transfer data for Washington State, aquired through a [Washington State Department of Ecology public records request](https://ecology.wa.gov/footer-pages/public-records-requests). 
+- **Text files (.csv)** with sets of 10,000 random oil spill scenarios (spill file) based on monte-carlo approach in [UBC-MOAD/moad_tool/MIDOSS](https://github.com/UBC-MOAD/moad_tools/tree/main/moad_tools/midoss)
+
 
 ## Related data sources
 - 2018 oil transfer data for Washington State can be accessed through a [Washington State Department of Ecology public records request](https://ecology.wa.gov/footer-pages/public-records-requests).
