@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Functions for aggregating the mass values in MOHID model output .sro files using
-the SOILED modeling suite, which combines SalishSeaCast, 
+a modeling suite, which combines SalishSeaCast, 
 WW3, HRDPS and MOHID models. 
 
 The monte carlo runs were completed on Compute Canada's supercomputer, `Graham` and this code is intended to be used on that system.  It requires initialization of a Virtual Environment.  See `/home/rmueller/projects/def-allen/rmueller/graham-python-env.txt`.
@@ -40,8 +40,8 @@ python3 -m pip install --no-index --upgrade pip
 python3 -m pip install -r /home/rmueller/projects/def-allen/rmueller/graham-python-env.txt
 ```
 
-input_yaml: file created by create_SOILED_sro_runlist.ipynb (https://github.com/MIDOSS/analysis-rachael/blob/main/notebooks/monte_carlo/create_SOILED_sro_runlist.ipynb)
-output_dir: directory location for ouput yaml `SOILED_massbalance_all_{dt_string}.yaml'
+input_yaml: file created by create_sro_runlist.ipynb (https://github.com/MIDOSS/analysis-rachael/blob/main/notebooks/monte_carlo/create_sro_runlist.ipynb)
+output_dir: directory location for ouput yaml `massbalance_all_{dt_string}.yaml'
 """
 
 #import sys
@@ -145,7 +145,7 @@ def aggregate_sro_mass_all(file_paths, output_dir):
     # write filenames to .yaml with timestamp in filename
     now = datetime.datetime.now()
     dt_string = now.strftime("%d%m%Y_%H:%M:%S")
-    out_f_all = output_dir/f'SOILED_massbalance_all_{dt_string}.yaml'
+    out_f_all = output_dir/f'massbalance_all_{dt_string}.yaml'
     with open(out_f_all, 'w') as output_yaml:
         documents = yaml.safe_dump(all_output, output_yaml)
     diss_out = output_dir/'files_with_negative_dissolution.yaml'
@@ -159,9 +159,9 @@ def aggregate_sro_mass_byoil(file_paths, output_dir):
     """
         Function for aggregating the mass values in MOHID model output
 
-        input_yaml: file created by create_SOILED_sro_runlist.ipynb (https://github.com/MIDOSS/analysis-rachael/blob/main/notebooks/monte_carlo/create_SOILED_sro_runlist.ipynb)
+        input_yaml: file created by create_sro_runlist.ipynb (https://github.com/MIDOSS/analysis-rachael/blob/main/notebooks/monte_carlo/create_sro_runlist.ipynb)
 
-        output_dir: directory location for ouput yaml `SOILED_massbalance_byoil_{dt_string}.yaml'
+        output_dir: directory location for ouput yaml `massbalance_byoil_{dt_string}.yaml'
 
     """
     # list of variables to save from .sro file
@@ -229,7 +229,7 @@ def aggregate_sro_mass_byoil(file_paths, output_dir):
     # write filenames to .yaml with timestamp in filename
     now = datetime.datetime.now()
     dt_string = now.strftime("%d%m%Y_%H:%M:%S")
-    out_f_oils = output_dir/f'SOILED_massbalance_byoil_{dt_string}.yaml'
+    out_f_oils = output_dir/f'massbalance_byoil_{dt_string}.yaml'
     with open(out_f_oils, 'w') as output_yaml:
         documents = yaml.safe_dump(output, output_yaml)
     return output

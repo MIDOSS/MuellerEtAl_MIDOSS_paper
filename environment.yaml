@@ -1,0 +1,17 @@
+name: midoss_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=>3.8
+  - numpy
+  - pandas
+  - matplotlib
+  - yaml
+  - geopandas
+  - xarray
+  - netcdf4
+  - pip
+  - jupyterlab
+  - pip:
+      - h5py
