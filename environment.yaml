@@ -13,5 +13,6 @@ dependencies:
   - netcdf4
   - pip
   - jupyterlab
+  - cmocean
   - pip:
       - h5py
