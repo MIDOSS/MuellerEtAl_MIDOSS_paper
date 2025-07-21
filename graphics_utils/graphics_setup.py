@@ -36,6 +36,15 @@ labels = [
     'Jet Fuel', 
     'Other'
 ]
+oil_labels_dict = {"akns":"ANS",
+            "oils":"all oils",
+           "bunker":"Bunker-C",
+           "diesel":"Diesel",
+           "dilbit":"Dilbit",
+           "gas":"Diesel",
+           "jet":"Diesel",
+           "other":"Bunker-C"}
+
 oil_types = ["Bunker-C", "Diesel", "Dilbit", "ANS"]
 
 colors = [
@@ -84,5 +93,11 @@ oil_colors_dict={
     'Diesel':'darkgoldenrod',#'cornflowerblue',
 }
 
+
+# misc.
+
+# color of shoreline
+shoreline ='grey'
+shorelw = .2
 
  
