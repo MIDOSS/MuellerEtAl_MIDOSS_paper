@@ -15,5 +15,6 @@ dependencies:
   - matplotlib
   - cmocean
   - Cartopy
+  - openpyxl
   - pip:
       - h5py
