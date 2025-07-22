@@ -6,13 +6,14 @@ dependencies:
   - python=>3.8
   - numpy
   - pandas
-  - matplotlib
-  - yaml
   - geopandas
+  - yaml
   - xarray
   - netcdf4
   - pip
   - jupyterlab
+  - matplotlib
   - cmocean
+  - Cartopy
   - pip:
       - h5py
