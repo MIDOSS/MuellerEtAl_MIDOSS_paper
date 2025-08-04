@@ -9,6 +9,7 @@ dependencies:
   - geopandas
   - yaml
   - xarray
+  - rioxarray
   - netcdf4
   - pip
   - jupyterlab
