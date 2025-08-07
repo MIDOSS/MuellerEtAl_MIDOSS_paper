@@ -7,10 +7,15 @@ Code repository <br />
 
 This repository contains the code developed during the MEOPAR-funded [MIDOSS project](https://midoss-docs.readthedocs.io/en/latest/index.html) and neccessary for reproducing the results and figures presented in: 
 
-1. Mueller, R.D., S.E. Allen, S. Chang, H. Niu, D. Latornell, S. Li, R. Bagshaw, A. Bhudia, V. Do, K. Forysinsky, B. Moore-Maley, C. Power, L. Vespaziani. In Review. A statistical representation of oil spill fate in the Salish Sea (Part 1). Submitted to Marine Pollution Bulletin’s special issue on Oil Spills in Aquatic Systems.  
-2. Mueller, R.D., S.E. Allen, S. Chang, H. Niu, D. Latornell, S. Li, R. Bagshaw, A. Bhudia, V. Do, K. Forysinsky, B. Moore-Maley, C. Power, L. Vespaziani. Accepted. A statistical representation of oil spill fate in the Salish Sea (Part 2). Submitted to Marine Pollution Bulletin’s special issue on Oil Spills in Aquatic Systems.  
+1. Mueller, R.D., Allen, S.E., Chang, S., Niu, H., Latornell, D.J., Li, S., Bagshaw, R., Bhudia, A., Do, V., Forysinski, K. and Moore-Maley, B., 2025. A statistical representation of oil spill fate in the Salish Sea (Part 1). Marine Pollution Bulletin, 221, p.118452. DOI: [https://doi.org/10.1016/j.marpolbul.2025.118452](https://doi.org/10.1016/j.marpolbul.2025.118452)  
+2. Mueller, R.D., Allen, S.E., Chang, S., Niu, H., Latornell, D.J., Li, S., Bagshaw, R., Bhudia, A., Do, V., Forysinski, K. and Moore-Maley, B., 2025. A statistical representation of oil spill fate in the Salish Sea (Part 2). Marine Pollution Bulletin, 221, p.118410. DOI: [https://doi.org/10.1016/j.marpolbul.2025.118410](https://doi.org/10.1016/j.marpolbul.2025.118410)
 
-This code is not being maintained. 
+Please reference this code as: MIDOSS research team. 2018. Source code for: A statistical representation of oil spill fate in the Salish Sea. Zenodo. https://doi.org/10.5281/zenodo.10939119.
+
+Non-proprietary data can be found at Canada's Federated Research Data Repository:
+Mueller, R., Allen, S., Chang, S., Niu, H., Latornell, D., Moore-Maley, B., Bhudia, A., Do, V., Forysinkski, K., Power, C., Bagshaw, R., Li, S. (2025). MuellerEtAl_MIDOSS_datasets. Federated Research Data Repository. [https://doi.org/10.20383/103.01353](https://doi.org/10.20383/103.01353).
+
+AIS ship track data can be requested from [SPIRE maritime](https://spire.com/maritime/) (formerly exactEarth)
 
 ## Related repositories
 - Creation of `HDF5` forcing files from, e.g., [SalishSeaCast](https://salishsea.eos.ubc.ca/erddap/index.html) for `MOHID` oil spill mode: [Make-MIDOSS-Forcing](https://github.com/MIDOSS/Make-MIDOSS-Forcing)
@@ -19,17 +24,6 @@ This code is not being maintained.
     1. [MOHID-Cmd](https://github.com/MIDOSS/MOHID-Cmd?tab=readme-ov-file#license), and
     2. [MIDOSS-MOHID-CODE](https://github.com/MIDOSS/MIDOSS-MOHID-CODE).
 - Code developed by Casey Hilliard to generate voyages from individual ship tracks ([1_generate_tracks_from_AIS_DB_vectorized.py](https://github.com/casey-h/MEOPAR_AIS/blob/master/02_Segment_Development/1_generate_tracks_from_AIS_DB_vectorized.py))
-
-## Records Archive 
-Mueller, R., Allen, S., Chang, S., Niu, H., Latornell, D., Moore-Maley, B., Bhudia, A., Do, V., Forysinkski, K., Power, C., Bagshaw, R., Li, S. (2025). MuellerEtAl_MIDOSS_datasets. Federated Research Data Repository. [https://doi.org/10.20383/103.01353](https://doi.org/10.20383/103.01353)
-
-- **GeoTiffs** derived from AIS ship track data
-- **Yaml files** with weighting values derived from, e.g., 2018 oil transfer data for Washington State, aquired through a [Washington State Department of Ecology public records request](https://ecology.wa.gov/footer-pages/public-records-requests). 
-- **Text files (.csv)** with sets of 10,000 random oil spill scenarios (spill file) based on monte-carlo approach in [UBC-MOAD/moad_tool/MIDOSS](https://github.com/UBC-MOAD/moad_tools/tree/main/moad_tools/midoss)
-
-## Related data sources
-- 2018 oil transfer data for Washington State can be accessed through a [Washington State Department of Ecology public records request](https://ecology.wa.gov/footer-pages/public-records-requests).
-- AIS ship track data is from [SPIRE maritime](https://spire.com/maritime/) (formerly exactEarth)
 
 ## Funding
 This project was funded under MEOPAR (Grant number 37.1 as well as an unnumbered knowledge mobilization grant) and by Digital Research Alliance of Canada Resource Allocation Competition grants RRG 1541 and 1792.
@@ -47,7 +41,7 @@ This project was funded under MEOPAR (Grant number 37.1 as well as an unnumbered
 10. Mueller, Rachael: Post-doctoral fellow in charge of coordinating research groups, supervising students, leading methods and development of the script to randomize oil spills [randomize oil spills](https://github.com/MIDOSS/MuellerEtAl_MIDOSS_paper/blob/main/moad_tools/random_oil_spills.py), managing the selection of oil weathering parameters, developing research, developing code, analyzing Department of Ecology data, running MOHID model, analyzing output, developing post-processing tools, documenting information, presenting research, creating the graphics for and writing the research manuscripts.
 11. Niu, Haibo: Oil spill model lead in charge of oil spill modeling methods and parameterizations. 
 12. Power, Cameron: Developed GIS platform and AIS data products used in the script to randomize oil spills [randomize oil spills](https://github.com/MIDOSS/MuellerEtAl_MIDOSS_paper/blob/main/moad_tools/random_oil_spills.py). Implemented origin and destination attribution of AIS ship tracks in shapefiles. Researched ship and marine terminal information to inform and develop oil attribution.
-
+    
 ## Licenses
 
 This analysis and documentation are copyright 2018 by the [MIDOSS Project Contributors](https://midoss-docs.readthedocs.io/en/latest/CONTRIBUTORS.html) and The University of British Columbia.
