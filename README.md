@@ -7,8 +7,8 @@ Code repository <br />
 
 This repository contains the code developed during the MEOPAR-funded [MIDOSS project](https://midoss-docs.readthedocs.io/en/latest/index.html) and neccessary for reproducing the results and figures presented in: 
 
-1. Mueller, R.D., Allen, S.E., Chang, S., Niu, H., Latornell, D.J., Li, S., Bagshaw, R., Bhudia, A., Do, V., Forysinski, K. and Moore-Maley, B., 2025. A statistical representation of oil spill fate in the Salish Sea (Part 1). Marine Pollution Bulletin, 221, p.118410. DOI: [https://doi.org/10.1016/j.marpolbul.2025.118452](https://doi.org/10.1016/j.marpolbul.2025.118452)  
-2. Mueller, R.D., Allen, S.E., Chang, S., Niu, H., Latornell, D.J., Li, S., Bagshaw, R., Bhudia, A., Do, V., Forysinski, K. and Moore-Maley, B., 2025. A statistical representation of oil spill fate in the Salish Sea (Part 2). Marine Pollution Bulletin, 221, p.118452. DOI: [https://doi.org/10.1016/j.marpolbul.2025.118410](https://doi.org/10.1016/j.marpolbul.2025.118410)
+1. Mueller, R.D., Allen, S.E., Chang, S., Niu, H., Latornell, D.J., Li, S., Bagshaw, R., Bhudia, A., Do, V., Forysinski, K. and Moore-Maley, B., 2025. A statistical representation of oil spill fate in the Salish Sea (Part 1). Marine Pollution Bulletin, 221, p.118452. DOI: [https://doi.org/10.1016/j.marpolbul.2025.118452](https://doi.org/10.1016/j.marpolbul.2025.118452)  
+2. Mueller, R.D., Allen, S.E., Chang, S., Niu, H., Latornell, D.J., Li, S., Bagshaw, R., Bhudia, A., Do, V., Forysinski, K. and Moore-Maley, B., 2025. A statistical representation of oil spill fate in the Salish Sea (Part 2). Marine Pollution Bulletin, 221, p.118410. DOI: [https://doi.org/10.1016/j.marpolbul.2025.118410](https://doi.org/10.1016/j.marpolbul.2025.118410)
 
 Please reference this code as: MIDOSS research team. 2018. Source code for: A statistical representation of oil spill fate in the Salish Sea. Zenodo. https://doi.org/10.5281/zenodo.10939119.
 
