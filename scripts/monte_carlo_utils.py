@@ -437,7 +437,7 @@ def assign_facility_region(facilities_xlsx):
     )
 
     # define latitude bins
-    lat_partition = [46.9, 48.3, 48.7]
+    lat_partition = [47, 48.3, 48.7]
 
     # define conditions used to bin facilities by latitude
     conditions = [
@@ -453,7 +453,7 @@ def assign_facility_region(facilities_xlsx):
     values = ['Columbia River','Puget Sound','Anacortes','Whatcom County']
     # create a new column and assign values to it using 
     # defined conditions on latitudes
-    facdf['Region'] = numpy.select(conditions, values)
+    facdf['Region'] = numpy.select(conditions, values, default='None')
 
     return facdf
 
