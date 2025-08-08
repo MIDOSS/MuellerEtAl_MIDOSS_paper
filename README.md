@@ -15,7 +15,10 @@ Please reference this code as: MIDOSS research team. 2018. Source code for: A st
 Non-proprietary data can be found at Canada's Federated Research Data Repository:
 Mueller, R., Allen, S., Chang, S., Niu, H., Latornell, D., Moore-Maley, B., Bhudia, A., Do, V., Forysinkski, K., Power, C., Bagshaw, R., Li, S. (2025). MuellerEtAl_MIDOSS_datasets. Federated Research Data Repository. [https://doi.org/10.20383/103.01353](https://doi.org/10.20383/103.01353).
 
-AIS ship track data can be requested from [SPIRE maritime](https://spire.com/maritime/) (formerly exactEarth)
+2018 AIS ship track data was purchased from [SPIRE maritime](https://spire.com/maritime/) (formerly exactEarth)
+
+2018 oil transfer data was provided as public record from Washington State Department of Ecology through [https://ecology.wa.gov/footer-pages/public-records-requests](https://ecology.wa.gov/footer-pages/public-records-requests). 
+
 
 ## Related repositories
 - Creation of `HDF5` forcing files from, e.g., [SalishSeaCast](https://salishsea.eos.ubc.ca/erddap/index.html) for `MOHID` oil spill mode: [Make-MIDOSS-Forcing](https://github.com/MIDOSS/Make-MIDOSS-Forcing)
